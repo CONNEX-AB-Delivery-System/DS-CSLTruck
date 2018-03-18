@@ -1,0 +1,11 @@
+ ssh.settings {
+      knownHosts = allowAnyHosts
+ }
+
+remotes {
+    ev3dev {
+        host = 'ev3dev.local
+        user = 'robot'
+        password = 'maker'
+    }
+}
