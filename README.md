@@ -1,4 +1,4 @@
-# Template project with Gradle
+# Package Delivery System / CSLTruck project with Gradle
 
 ## Why
 
