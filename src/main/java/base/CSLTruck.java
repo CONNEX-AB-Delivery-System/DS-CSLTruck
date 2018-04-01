@@ -1,8 +1,6 @@
 package base;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -21,15 +19,26 @@ public class CSLTruck {
 
         //final EV3LargeRegulatedMotor leftMottor = new EV3LargeRegulatedMotor(MotorPort.B);
         //final EV3LargeRegulatedMotor rightMottor = new EV3LargeRegulatedMotor(MotorPort.C);
-        final EV3LargeRegulatedMotor motorDrive = new EV3LargeRegulatedMotor(MotorPort.D);
-        final EV3MediumRegulatedMotor motorSteer = new EV3MediumRegulatedMotor(MotorPort.C);
-        //final EV3LargeRegulatedMotor craneLift = new EV3LargeRegulatedMotor(MotorPort.B);
-        //final EV3MediumRegulatedMotor craneGrabber = new EV3MediumRegulatedMotor(MotorPort.A);
+        //final EV3LargeRegulatedMotor motorDrive = new EV3LargeRegulatedMotor(MotorPort.D);
+        //final EV3MediumRegulatedMotor motorSteer = new EV3MediumRegulatedMotor(MotorPort.C);
+        final EV3LargeRegulatedMotor craneLift = new EV3LargeRegulatedMotor(MotorPort.B);
+        final EV3MediumRegulatedMotor craneGrabber = new EV3MediumRegulatedMotor(MotorPort.A);
+
+        System.out.println("Motors initialized");
+
+        //https://docs.oracle.com/javase/7/docs/api/java/net/ServerSocket.html
         ServerSocket serv = new ServerSocket(19231);
 
         Socket socket = serv.accept();
+
         BufferedReader reader = new BufferedReader(new InputStreamReader(
                 socket.getInputStream()));
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
+                socket.getOutputStream()));
+
+        String outputValue = socket.getLocalSocketAddress().toString();
+
+        writer.write(outputValue+"\n");writer.flush();
 
         System.out.println("Checking Battery");
         System.out.println("Votage: " + Battery.getInstance().getVoltage());
@@ -40,51 +49,51 @@ public class CSLTruck {
                 System.out.println("RECIEVED " + line);
                 switch (line) {
                     case "UP-PRESS":
-                        motorDrive.setSpeed(500);
+                        craneLift.setSpeed(500);
                         // leftMottor.setAcceleration(150);
-                        motorDrive.forward();
+                        craneLift.forward();
                         //rightMottor.setSpeed(1500);
                         // rightMottor.setAcceleration(150);
                         //rightMottor.forward();
                         break;
                     case "UP-RELEASE":
-                        motorDrive.stop(true);
+                        craneLift.stop(true);
                         //rightMottor.stop(true);
                         break;
                     case "DOWN-PRESS":
-                        motorDrive.setSpeed(5500);
+                        craneLift.setSpeed(500);
                         // leftMottor.setAcceleration(150);
-                        motorDrive.backward();
+                        craneLift.backward();
                         //rightMottor.setSpeed(1500);
                         // rightMottor.setAcceleration(150);
                         //rightMottor.backward();
                         break;
                     case "DOWN-RELEASE":
-                        motorDrive.stop(true);
+                        craneLift.stop(true);
                         //rightMottor.stop(true);
                         break;
                     case "LEFT-PRESS":
-                        //rightMottor.setSpeed(1500);
+                        craneGrabber.setSpeed(400);
                         // rightMottor.setAcceleration(150);
-                        //rightMottor.backward();
+                        craneGrabber.backward();
                         //leftMottor.setSpeed(1500);
                         // leftMottor.setAcceleration(150);
                         //leftMottor.forward();
                         break;
                     case "LEFT-RELEASE":
-                        //rightMottor.stop(true);
+                        craneGrabber.stop(true);
                         //leftMottor.stop(true);
                         break;
                     case "RIGHT-PRESS":
-                        //rightMottor.setSpeed(1500);
+                        craneGrabber.setSpeed(400);
                         // rightMottor.setAcceleration(150);
-                        //rightMottor.forward();
+                        craneGrabber.forward();
                         //leftMottor.setSpeed(1500);
                         // leftMottor.setAcceleration(150);
                         //leftMottor.backward();
                         break;
                     case "RIGHT-RELEASE":
-                        //rightMottor.stop(true);
+                        craneGrabber.stop(true);
                         //leftMottor.stop(true);
                         break;
                     case "STOP":
