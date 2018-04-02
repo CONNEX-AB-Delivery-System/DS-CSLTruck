@@ -23,84 +23,171 @@ public class CSLTruck {
         //final EV3MediumRegulatedMotor motorSteer = new EV3MediumRegulatedMotor(MotorPort.C);
         final EV3LargeRegulatedMotor craneLift = new EV3LargeRegulatedMotor(MotorPort.B);
         final EV3MediumRegulatedMotor craneGrabber = new EV3MediumRegulatedMotor(MotorPort.A);
+        final EV3MediumRegulatedMotor steering = new EV3MediumRegulatedMotor(MotorPort.C);
+        final EV3MediumRegulatedMotor mainMotor = new EV3MediumRegulatedMotor(MotorPort.D);
 
         System.out.println("Motors initialized");
 
-        //https://docs.oracle.com/javase/7/docs/api/java/net/ServerSocket.html
-        ServerSocket serv = new ServerSocket(19231);
-
-        Socket socket = serv.accept();
-
-        BufferedReader reader = new BufferedReader(new InputStreamReader(
-                socket.getInputStream()));
-        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
-                socket.getOutputStream()));
-
-        String outputValue = socket.getLocalSocketAddress().toString();
-
-        writer.write(outputValue+"\n");writer.flush();
+//        //https://docs.oracle.com/javase/7/docs/api/java/net/ServerSocket.html
+//        ServerSocket serv = new ServerSocket(19231);
+//
+//        Socket socket = serv.accept();
+//
+//        BufferedReader reader = new BufferedReader(new InputStreamReader(
+//                socket.getInputStream()));
+//        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
+//                socket.getOutputStream()));
+//
+//        String outputValue = socket.getLocalSocketAddress().toString();
+//
+//        writer.write(outputValue+"\n"); writer.flush();
 
         System.out.println("Checking Battery");
-        System.out.println("Votage: " + Battery.getInstance().getVoltage());
+        System.out.println("Voltage: " + Battery.getInstance().getVoltage());
 
-        // the listener with the while readline
-        String line;
-        while ((line = reader.readLine()) != "STOP" && isRunning) {
-                System.out.println("RECIEVED " + line);
-                switch (line) {
-                    case "UP-PRESS":
-                        craneLift.setSpeed(500);
-                        // leftMottor.setAcceleration(150);
-                        craneLift.forward();
-                        //rightMottor.setSpeed(1500);
-                        // rightMottor.setAcceleration(150);
-                        //rightMottor.forward();
-                        break;
-                    case "UP-RELEASE":
-                        craneLift.stop(true);
-                        //rightMottor.stop(true);
-                        break;
-                    case "DOWN-PRESS":
-                        craneLift.setSpeed(500);
-                        // leftMottor.setAcceleration(150);
-                        craneLift.backward();
-                        //rightMottor.setSpeed(1500);
-                        // rightMottor.setAcceleration(150);
-                        //rightMottor.backward();
-                        break;
-                    case "DOWN-RELEASE":
-                        craneLift.stop(true);
-                        //rightMottor.stop(true);
-                        break;
-                    case "LEFT-PRESS":
-                        craneGrabber.setSpeed(400);
-                        // rightMottor.setAcceleration(150);
-                        craneGrabber.backward();
-                        //leftMottor.setSpeed(1500);
-                        // leftMottor.setAcceleration(150);
-                        //leftMottor.forward();
-                        break;
-                    case "LEFT-RELEASE":
-                        craneGrabber.stop(true);
-                        //leftMottor.stop(true);
-                        break;
-                    case "RIGHT-PRESS":
-                        craneGrabber.setSpeed(400);
-                        // rightMottor.setAcceleration(150);
-                        craneGrabber.forward();
-                        //leftMottor.setSpeed(1500);
-                        // leftMottor.setAcceleration(150);
-                        //leftMottor.backward();
-                        break;
-                    case "RIGHT-RELEASE":
-                        craneGrabber.stop(true);
-                        //leftMottor.stop(true);
-                        break;
-                    case "STOP":
-                        CSLTruck.isRunning = false;
-                        break;
-                }
-            }
+        mainMotor.setSpeed(300);
+        mainMotor.forward();
+
+        try
+        {
+            Thread.sleep(10000);
+        }
+        catch(InterruptedException ex)
+        {
+            Thread.currentThread().interrupt();
+        }
+
+        mainMotor.stop();
+
+        mainMotor.setSpeed(300);
+        mainMotor.backward();
+
+        try
+        {
+            Thread.sleep(5000);
+        }
+        catch(InterruptedException ex)
+        {
+            Thread.currentThread().interrupt();
+        }
+
+        mainMotor.stop();
+
+        craneLift.setSpeed(500);
+        craneLift.backward();
+
+        try
+        {
+            Thread.sleep(10000);
+        }
+        catch(InterruptedException ex)
+        {
+            Thread.currentThread().interrupt();
+        }
+
+        craneLift.stop(true);
+
+        craneLift.setSpeed(500);
+        craneLift.forward();
+
+        try
+        {
+            Thread.sleep(5000);
+        }
+        catch(InterruptedException ex)
+        {
+            Thread.currentThread().interrupt();
+        }
+
+        craneLift.stop(true);
+
+        steering.setSpeed(400);
+        steering.rotate(40);
+
+        try
+        {
+            Thread.sleep(2000);
+        }
+        catch(InterruptedException ex)
+        {
+            Thread.currentThread().interrupt();
+        }
+
+        steering.stop(true);
+
+        steering.setSpeed(400);
+        steering.rotate(-40);
+
+        try
+        {
+            Thread.sleep(2000);
+        }
+        catch(InterruptedException ex)
+        {
+            Thread.currentThread().interrupt();
+        }
+
+        steering.stop(true);
+
+
+//        // the listener with the while readline
+//        String line;
+//        while ((line = reader.readLine()) != "STOP" && isRunning) {
+//                System.out.println("RECIEVED " + line);
+//                switch (line) {
+//                    case "UP-PRESS":
+//                        craneLift.setSpeed(500);
+//                        // leftMottor.setAcceleration(150);
+//                        craneLift.forward();
+//                        //rightMottor.setSpeed(1500);
+//                        // rightMottor.setAcceleration(150);
+//                        //rightMottor.forward();
+//                        break;
+//                    case "UP-RELEASE":
+//                        craneLift.stop(true);
+//                        //rightMottor.stop(true);
+//                        break;
+//                    case "DOWN-PRESS":
+//                        craneLift.setSpeed(500);
+//                        // leftMottor.setAcceleration(150);
+//                        craneLift.backward();
+//                        //rightMottor.setSpeed(1500);
+//                        // rightMottor.setAcceleration(150);
+//                        //rightMottor.backward();
+//                        break;
+//                    case "DOWN-RELEASE":
+//                        craneLift.stop(true);
+//                        //rightMottor.stop(true);
+//                        break;
+//                    case "LEFT-PRESS":
+//                        craneGrabber.setSpeed(400);
+//                        // rightMottor.setAcceleration(150);
+//                        craneGrabber.backward();
+//                        //leftMottor.setSpeed(1500);
+//                        // leftMottor.setAcceleration(150);
+//                        //leftMottor.forward();
+//                        break;
+//                    case "LEFT-RELEASE":
+//                        craneGrabber.stop(true);
+//                        //leftMottor.stop(true);
+//                        break;
+//                    case "RIGHT-PRESS":
+//                        craneGrabber.setSpeed(400);
+//                        // rightMottor.setAcceleration(150);
+//                        craneGrabber.forward();
+//                        //leftMottor.setSpeed(1500);
+//                        // leftMottor.setAcceleration(150);
+//                        //leftMottor.backward();
+//                        break;
+//                    case "RIGHT-RELEASE":
+//                        craneGrabber.stop(true);
+//                        //leftMottor.stop(true);
+//                        break;
+//                    case "STOP":
+//                        CSLTruck.isRunning = false;
+//                        break;
+//                }
+//            }
 
 
         //System.out.println("Creating Motor A & B");
