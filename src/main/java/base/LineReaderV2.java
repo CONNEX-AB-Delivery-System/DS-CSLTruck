@@ -1,5 +1,14 @@
 package base;
 
+import ev3dev.sensors.BaseSensor;
+import lejos.hardware.port.Port;
+//import lejos.hardware.sensor.SensorMode;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * Mindsensors LineReader V2 sensor driver
  *
@@ -8,12 +17,12 @@ package base;
  *
  */
 
-import ev3dev.sensors.BaseSensor;
-import lejos.hardware.port.Port;
 
 public class LineReaderV2 extends BaseSensor {
 
     private static final String MINDSENSORS_LINEREADERV2 = "ms-line-leader";
+
+    private String lineColorMode = "black";
 
     //MODES
 
@@ -37,9 +46,17 @@ public class LineReaderV2 extends BaseSensor {
      */
     public static final String RAW = "RAW";
 
+    private final Set<String> trackingAllowedModeList = new HashSet<>(
+            Arrays.asList(PID, PID_ALL, CAL, RAW));
+
     //???
     private void initModes() {
-        this.setStringAttribute("mode", "TRACK");
+        this.setStringAttribute("mode", "PID");
+    }
+
+    private void setMode(String mode) {
+        //TODO: allow only allowed modes
+        this.setStringAttribute("mode", mode);
     }
 
     public LineReaderV2(final Port portName) {
@@ -47,12 +64,82 @@ public class LineReaderV2 extends BaseSensor {
         this.initModes();
     }
 
+
     /**
-     * Send a single byte command represented by a letter
-     * @param cmd the letter that identifies the command
+     * Get the PID mode value
+     *
+     * @return PID value (percentage -100;100)
      */
-    public void sendCommand(final String cmd) {
-        this.setStringAttribute("command", cmd);
+    public int getPIDValue() {
+        this.setMode("PID");
+        return this.getIntegerAttribute("value0");
+    }
+
+    /**
+     * Get the PID-ALL mode values
+     *
+     * @return  array of values:
+     *          value0: Steering (-100 to 100)
+     *          value1: Average (0 to 80)
+     *          value2: Result (as bits)
+     */
+    public int[] getPIDALLValues() {
+        int lightArrayLength = 3;
+        int[] intArray = new int[lightArrayLength];
+
+        this.setMode("PID-ALL");
+        for (int i = 0; i < lightArrayLength; i++) {
+            String value = "value" + i;
+            intArray[i] = this.getIntegerAttribute(value);
+        }
+
+        return intArray;
+    }
+
+    /**
+     * Get the CAL values
+     *
+     * @return return array of values from individual IR lights (0 - 7)
+     */
+    public int[] getCALalues() {
+        int lightArrayLength = 8;
+        int[] intArray = new int[lightArrayLength];
+        this.setMode("CAL");
+
+        for (int i = 0; i < lightArrayLength; i++) {
+            String value = "value" + i;
+            intArray[i] = this.getIntegerAttribute(value);
+        }
+
+        return intArray;
+    }
+
+    /**
+     * Get the RAW values
+     *
+     * @return return array of values from individual IR lights (0 - 7)
+     */
+    public int[] getRAWValues() {
+        int lightArrayLength = 8;
+        int[] intArray = new int[lightArrayLength];
+        this.setMode("RAW");
+
+        for (int i = 0; i < lightArrayLength; i++) {
+            String value = "value" + i;
+            intArray[i] = this.getIntegerAttribute(value);
+        }
+
+        return intArray;
+    }
+
+    /**
+     * Get LineReader line color mode
+     *
+     * @return color name of mode
+     */
+
+    public String getLineColorMode() {
+        return this.lineColorMode;
     }
 
 
@@ -71,6 +158,48 @@ public class LineReaderV2 extends BaseSensor {
      * 50HZ	Configures sensor for 50Hz electrical mains
      * UNIVERSAL	Configures sensor for any (50/60Hz) electrical mains
      */
+
+    public void wake() {
+        this.sendCommand("WAKE");
+    }
+
+    public void sleep() {
+        this.sendCommand("SLEEP");
+    }
+
+    public void calibrateWhite() {
+        this.sendCommand("CAL-WHITE");
+    }
+
+    public void calibrateBlack() {
+        this.sendCommand("CAL-BLACK");
+    }
+
+    /**
+     * param: color: line color
+     */
+
+    public void invertColor(String color) {
+        if (color.equals("black"))
+        {
+            this.sendCommand("RST-COL");
+            this.lineColorMode = color;
+        }
+        if (color.equals("white"))
+        {
+            this.sendCommand("INV-COL");
+            this.lineColorMode = color;
+        }
+
+    }
+
+    /**
+     * Send a single byte command represented by a letter
+     * @param cmd the letter that identifies the command
+     */
+    public void sendCommand(final String cmd) {
+        this.setStringAttribute("command", cmd);
+    }
 
 
 }

@@ -3,11 +3,15 @@ package base;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 
 import ev3dev.actuators.lego.motors.EV3LargeRegulatedMotor;
 import ev3dev.actuators.lego.motors.EV3MediumRegulatedMotor;
 import ev3dev.sensors.Battery;
 import lejos.hardware.port.MotorPort;
+import lejos.hardware.port.SensorPort;
+import ev3dev.hardware.EV3DevSensorDevice;
+import ev3dev.sensors.BaseSensor;
 import lejos.utility.Delay;
 
 public class CSLTruck {
@@ -16,17 +20,44 @@ public class CSLTruck {
 
     public static void main(final String[] args) throws IOException {
 
-
-        //final EV3LargeRegulatedMotor leftMottor = new EV3LargeRegulatedMotor(MotorPort.B);
-        //final EV3LargeRegulatedMotor rightMottor = new EV3LargeRegulatedMotor(MotorPort.C);
         //final EV3LargeRegulatedMotor motorDrive = new EV3LargeRegulatedMotor(MotorPort.D);
         //final EV3MediumRegulatedMotor motorSteer = new EV3MediumRegulatedMotor(MotorPort.C);
-        final EV3LargeRegulatedMotor craneLift = new EV3LargeRegulatedMotor(MotorPort.B);
-        final EV3MediumRegulatedMotor craneGrabber = new EV3MediumRegulatedMotor(MotorPort.A);
-        final EV3MediumRegulatedMotor steering = new EV3MediumRegulatedMotor(MotorPort.C);
-        final EV3MediumRegulatedMotor mainMotor = new EV3MediumRegulatedMotor(MotorPort.D);
+        //final EV3LargeRegulatedMotor craneLift = new EV3LargeRegulatedMotor(MotorPort.B);
+        //final EV3MediumRegulatedMotor craneGrabber = new EV3MediumRegulatedMotor(MotorPort.A);
+
 
         System.out.println("Motors initialized");
+
+
+        /*lr.wake();
+
+        lr.calibrateWhite();
+
+        int value = lr.getPIDValue();
+        //String mode = lr.getStringAttribute("mode");
+
+        System.out.println("Current value" + value);
+
+        int [] rawValues = lr.getRAWValues();
+
+        for (int i = 0; i < rawValues.length; i++) {
+            System.out.print("value" + i + " " + rawValues[i]);
+        }
+
+        lr.sleep();*/
+
+        CSLTruckSensorSuite sensorSuite = new CSLTruckSensorSuite();
+
+        //lr.setCurrentMode("RAW");
+
+        /*ArrayList<String> modeName = lr.getAvailableModes();
+
+
+        for (int i = 0; i < modeName.size(); i++) {
+            System.out.println("Current Mode" + modeName.get(i));
+        }*/
+
+
 
 //        //https://docs.oracle.com/javase/7/docs/api/java/net/ServerSocket.html
 //        ServerSocket serv = new ServerSocket(19231);
@@ -45,89 +76,8 @@ public class CSLTruck {
         System.out.println("Checking Battery");
         System.out.println("Voltage: " + Battery.getInstance().getVoltage());
 
-        mainMotor.setSpeed(300);
-        mainMotor.forward();
 
-        try
-        {
-            Thread.sleep(10000);
-        }
-        catch(InterruptedException ex)
-        {
-            Thread.currentThread().interrupt();
-        }
 
-        mainMotor.stop();
-
-        mainMotor.setSpeed(300);
-        mainMotor.backward();
-
-        try
-        {
-            Thread.sleep(5000);
-        }
-        catch(InterruptedException ex)
-        {
-            Thread.currentThread().interrupt();
-        }
-
-        mainMotor.stop();
-
-        craneLift.setSpeed(500);
-        craneLift.backward();
-
-        try
-        {
-            Thread.sleep(10000);
-        }
-        catch(InterruptedException ex)
-        {
-            Thread.currentThread().interrupt();
-        }
-
-        craneLift.stop(true);
-
-        craneLift.setSpeed(500);
-        craneLift.forward();
-
-        try
-        {
-            Thread.sleep(5000);
-        }
-        catch(InterruptedException ex)
-        {
-            Thread.currentThread().interrupt();
-        }
-
-        craneLift.stop(true);
-
-        steering.setSpeed(400);
-        steering.rotate(40);
-
-        try
-        {
-            Thread.sleep(2000);
-        }
-        catch(InterruptedException ex)
-        {
-            Thread.currentThread().interrupt();
-        }
-
-        steering.stop(true);
-
-        steering.setSpeed(400);
-        steering.rotate(-40);
-
-        try
-        {
-            Thread.sleep(2000);
-        }
-        catch(InterruptedException ex)
-        {
-            Thread.currentThread().interrupt();
-        }
-
-        steering.stop(true);
 
 
 //        // the listener with the while readline
