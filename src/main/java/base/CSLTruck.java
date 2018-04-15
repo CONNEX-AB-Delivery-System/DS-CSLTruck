@@ -3,429 +3,190 @@ package base;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Scanner;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
+import ev3dev.sensors.Battery;
+import ev3dev.sensors.ev3.EV3IRSensor;
+import lejos.hardware.port.MotorPort;
 import ev3dev.actuators.lego.motors.EV3LargeRegulatedMotor;
 import ev3dev.actuators.lego.motors.EV3MediumRegulatedMotor;
-import ev3dev.sensors.Battery;
-import lejos.hardware.port.MotorPort;
+
 import lejos.hardware.port.SensorPort;
-import ev3dev.hardware.EV3DevSensorDevice;
+
+import lejos.robotics.SampleProvider;
 import ev3dev.sensors.BaseSensor;
+import lejos.hardware.port.Port;
 import lejos.utility.Delay;
+
+/**
+ * Title: CSLTruck
+ *
+ * Main class for Delivery truck. Does all "dirty" stuff of initializing EV3 Motors and Sensors.
+ * Also starts serverSocket thread and respective Socket connections from SCS.
+ * After command "run" from SCS starts DTRun thread execution.
+ *
+ * NOTE: Nothing should be changed in this class.
+ */
+
 
 public class CSLTruck {
 
+    //Configuration
+    private static int HALF_SECOND = 500;
+
+    //TODO: synhronize isRunning variable between threads
+    //Synchronization variables between threads to allow intra thread communication
+    //Main variable for stopping execution
     static boolean isRunning = true;
+    //Variables for commands from/to SCS
+    static String inputCommandSCS = "";
+    static String outputCommandSCS = "none";
+    //Variables for controlling task thread
+    static boolean runThreadIsStarted = false;
+    static boolean runThreadIsExecuted = false;
 
-    //private static ServerSocket serverSocket;
+    //motor for drive forwards and backwards - connected to motor port D
+    public static EV3LargeRegulatedMotor motorDrive;
+    //motor for steering - connected to motor port C
+    public static EV3MediumRegulatedMotor motorSteer;
 
-    public EV3LargeRegulatedMotor motorDrive;
-    public EV3MediumRegulatedMotor motorSteer;
+    //motor for crane lifting - connected multiplexer port M1
+    private static EV3LargeRegulatedMotor craneRotation;
+    //motor for crane lifting - connected to motor port B
+    public static EV3MediumRegulatedMotor craneLift;
+    //motor for grabber - connected to motor port A
+    public static EV3MediumRegulatedMotor craneGrabber;
 
-    public CSLTruckSensorSuite sensorSuite;
-
-    public CSLTruck() {
-        //motorDrive = new EV3LargeRegulatedMotor(MotorPort.D);
-        //motorSteer = new EV3MediumRegulatedMotor(MotorPort.C);
-        //final EV3LargeRegulatedMotor craneLift = new EV3LargeRegulatedMotor(MotorPort.B);
-        //final EV3MediumRegulatedMotor craneGrabber = new EV3MediumRegulatedMotor(MotorPort.A);
-    }
-
-
-    public static void main(final String[] args) {
-
-
-        System.out.print("jefferson: starting..." + "\n");
-
-        final EV3LargeRegulatedMotor motorDrive = new EV3LargeRegulatedMotor(MotorPort.D);
-        final EV3MediumRegulatedMotor motorSteer = new EV3MediumRegulatedMotor(MotorPort.C);
-
-        new CSLTruck().startServer();
+    //sensor for proximity - connect to sensor port S1
+    public static EV3IRSensor sensorProximity;
+    //sensor for line reading - connected to sensor port S3
+    public static LineReaderV2 lineReader;
 
 
-    }
 
-    private boolean serverSocketRunning = true;
+    public static void main(final String[] args) throws IOException {
+        CSLTRun runThread;
 
-    public void startServer() {
-        final ExecutorService clientProcessingPool = Executors.newFixedThreadPool(10);
+        double minVoltage = 7.200;
 
-        Runnable serverTask = new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    ServerSocket serverSocket = new ServerSocket(8000);
-                    System.out.println("Waiting for clients to connect...");
-                    while (serverSocketRunning) {
-                        Socket clientSocket = serverSocket.accept();
-                        clientProcessingPool.submit(new ClientTask(clientSocket));
-
-                    }
-
-                    serverSocket.close();
-                    System.out.println("Server closed");
-
-                } catch (IOException e) {
-                    System.err.println("Unable to process client request");
-                    e.printStackTrace();
-                }
-            }
-        };
-
-        Thread serverThread = new Thread(serverTask);
-        serverThread.start();
-
-    }
-
-    private class ClientTask implements Runnable {
-        private final Socket clientSocket;
-
-        private boolean clientSocketRunning = true;
-
-        private ClientTask(Socket clientSocket) {
-            this.clientSocket = clientSocket;
-        }
-
-        @Override
-        public void run() {
-            System.out.println("Got connection from SCS!");
-
-            // Do whatever required to process the client's request
-
-            BufferedReader reader;
-            BufferedWriter writer;
-
-            try {
-                reader = new BufferedReader(new InputStreamReader(
-                        this.clientSocket.getInputStream()));
-                writer = new BufferedWriter(new OutputStreamWriter(
-                        this.clientSocket.getOutputStream()));
-
-                String outputValue = this.clientSocket.getLocalSocketAddress().toString();
-                writer.write(outputValue+"\n"); writer.flush();
-
-                String line;
-                while (this.clientSocketRunning) {
-                    line = reader.readLine();
-                    System.out.println("RECIEVED " + line);
-                    switch (line) {
-                        case "STOP":
-                            this.clientSocketRunning = false;
-                            serverSocketRunning = false;
-                            break;
-                        case "null":
-                            this.clientSocketRunning = false;
-                            serverSocketRunning = false;
-                            break;
-                        case "DELIVER":
-                            break;
-                    }
-                }
-
-                reader.close();
-                writer.close();
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            try {
-                this.clientSocket.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            System.out.println("Connection closed");
+        //Always check if battery voltage is enougth
+        System.out.println("Battery Voltage: " + Battery.getInstance().getVoltage());
+        System.out.println("Battery Current: " + Battery.getInstance().getBatteryCurrent());
+        if (Battery.getInstance().getVoltage() < minVoltage) {
+            System.out.println("Battery voltage to low, shutdown");
             System.exit(0);
         }
-    }
 
-}
-        //server.returnIPCSLT();
+        //initalize all motors here
+        motorDrive = new EV3LargeRegulatedMotor(MotorPort.C);
+        motorSteer = new EV3MediumRegulatedMotor(MotorPort.A);
+        System.out.println("Motor initialized");
+        //initalize all sensors here
+        //lineReader = new LineReaderV2(SensorPort.S1);
+        //sensorProximity = new EV3UltrasonicSensor(SensorPort.S3);
+        //DeliveryTruck.sensorProximity.enable();
+        System.out.println("Sensors initialized");
 
+        //open thread for socket server to listen/send commands to SCS
+        CSLTThreadPooledServer server = new CSLTThreadPooledServer("ServerThread-1", 8000);
+        server.start();
 
+        while (isRunning) {
+            //first, check if have received "kill" command from SCS
+            if (inputCommandSCS.equals("KILL")) {
+                //then stop everything
+                //isRunning = false;
+            }
 
-        //System.out.println("Motors initialized");
+            //check if have received "run" command from SCS and have not executed run thread before
+            if (inputCommandSCS.equals("RUN") && (!runThreadIsStarted)) {
+                //open thread for executing "run" task
+                runThread = new CSLTRun( "RunThread-1");
+                //add "run" task and "run executed" flags
+                runThreadIsExecuted = false;
+                runThreadIsStarted = true;
+                runThread.start();
+            }
 
+            //wait for some time till run thread is executed
+            if (!runThreadIsExecuted) {
+                try {
+                    Thread.sleep(10 * 100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                inputCommandSCS = "";
+                runThreadIsStarted = false;
+            }
 
-        /*lr.wake();
+            if (CSLTruck.outputCommandSCS.equals("FINISHED")) {
 
-        lr.calibrateWhite();
+                System.out.println("main-FINISHED");
+                server.isRunning();
 
-        int value = lr.getPIDValue();
-        //String mode = lr.getStringAttribute("mode");
+            }
 
-        System.out.println("Current value" + value);
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
 
-        int [] rawValues = lr.getRAWValues();
-
-        for (int i = 0; i < rawValues.length; i++) {
-            System.out.print("value" + i + " " + rawValues[i]);
         }
 
-        lr.sleep();*/
+        //Stop server to release socket bind
+        System.out.println("Stopping Server");
+        server.stopServerSocket();
 
-
-
-        //lr.setCurrentMode("RAW");
-
-        /*ArrayList<String> modeName = lr.getAvailableModes();
-
-
-        for (int i = 0; i < modeName.size(); i++) {
-            System.out.println("Current Mode" + modeName.get(i));
-        }*/
-
-
-
-//
-
-
-
-
-
-
-//        // the listener with the while readline
-//        String line;
-//        while ((line = reader.readLine()) != "STOP" && isRunning) {
-//                System.out.println("RECIEVED " + line);
-//                switch (line) {
-//                    case "UP-PRESS":
-//                        craneLift.setSpeed(500);
-//                        // leftMottor.setAcceleration(150);
-//                        craneLift.forward();
-//                        //rightMottor.setSpeed(1500);
-//                        // rightMottor.setAcceleration(150);
-//                        //rightMottor.forward();
-//                        break;
-//                    case "UP-RELEASE":
-//                        craneLift.stop(true);
-//                        //rightMottor.stop(true);
-//                        break;
-//                    case "DOWN-PRESS":
-//                        craneLift.setSpeed(500);
-//                        // leftMottor.setAcceleration(150);
-//                        craneLift.backward();
-//                        //rightMottor.setSpeed(1500);
-//                        // rightMottor.setAcceleration(150);
-//                        //rightMottor.backward();
-//                        break;
-//                    case "DOWN-RELEASE":
-//                        craneLift.stop(true);
-//                        //rightMottor.stop(true);
-//                        break;
-//                    case "LEFT-PRESS":
-//                        craneGrabber.setSpeed(400);
-//                        // rightMottor.setAcceleration(150);
-//                        craneGrabber.backward();
-//                        //leftMottor.setSpeed(1500);
-//                        // leftMottor.setAcceleration(150);
-//                        //leftMottor.forward();
-//                        break;
-//                    case "LEFT-RELEASE":
-//                        craneGrabber.stop(true);
-//                        //leftMottor.stop(true);
-//                        break;
-//                    case "RIGHT-PRESS":
-//                        craneGrabber.setSpeed(400);
-//                        // rightMottor.setAcceleration(150);
-//                        craneGrabber.forward();
-//                        //leftMottor.setSpeed(1500);
-//                        // leftMottor.setAcceleration(150);
-//                        //leftMottor.backward();
-//                        break;
-//                    case "RIGHT-RELEASE":
-//                        craneGrabber.stop(true);
-//                        //leftMottor.stop(true);
-//                        break;
-//                    case "STOP":
-//                        CSLTruck.isRunning = false;
-//                        break;
-//                }
-//            }
-
-
-        //System.out.println("Creating Motor A & B");
-        //final EV3LargeRegulatedMotor motorDrive = new EV3LargeRegulatedMotor(MotorPort.D);
-        //final EV3MediumRegulatedMotor motorSteer = new EV3MediumRegulatedMotor(MotorPort.C);
-        //final EV3LargeRegulatedMotor craneLift = new EV3LargeRegulatedMotor(MotorPort.B);
-        //final EV3MediumRegulatedMotor craneGrabber = new EV3MediumRegulatedMotor(MotorPort.A);
-
-
-
-
-
-
-        //To Stop the motor in case of pkill java for example
-        /*Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-            public void run() {
-                System.out.println("Emergency Stop");
-                motorDrive.stop();
-                motorSteer.stop();
-                craneLift.stop();
-                craneGrabber.stop();
-            }
-        }));
-
-        System.out.println("Defining the Stop mode");
-        motorDrive.brake();
-        motorSteer.brake();
-
-        System.out.println("Defining motor speed");
-        final int motorSpeed = 200;
-        motorDrive.setSpeed(motorSpeed);
-        //motorSteer.setSpeed(motorSpeed);
-
-        System.out.println("Go Forward with the motors");
-        motorDrive.forward();
-        //motorSteer.forward();
-
-        Delay.msDelay(2000);
-
-        System.out.println("Stop motors");
-        motorDrive.stop();
-        //motorSteer.stop();
-
-        System.out.println("Go Backward with the motors");
-        motorDrive.backward();
-        //motorSteer.backward();
-
-        Delay.msDelay(2000);
-
-        System.out.println("Stop motors");
-        motorDrive.stop();
-        //motorSteer.stop();
-
-        System.out.println("Checking Battery");
-        System.out.println("Votage: " + Battery.getInstance().getVoltage());
+        //motorSteer.close();
+        //motorDrive.close();
 
         System.exit(0);
 
 
-    }*/
+        /*
+        int distanceValue = 0;
 
-    //private final int serverSocketPort = 8000;
+        String name;
+        //lineReader.wakeUp();
+        name = lineReader.getName();
+        System.out.println("Sensor name: " + name);
 
-    //private ServerSocket serverSocket = null;
+        for(int i = 0; i <= 20; i++) {
 
-   /* public void startServer() {
+            sp = sensorProxmity.getListenMode();
+            int sampleSize = sp.sampleSize();
+            float[] sample = new float[sampleSize];
+            sp.fetchSample(sample, 0);
 
-        final ExecutorService clientProcessingPool = Executors.newFixedThreadPool(10);
+            Delay.msDelay(1000);
 
-        Runnable serverTask = new Runnable() {
-            @Override
+            sp = sensorProxmity.getDistanceMode();
+            sampleSize = sp.sampleSize();
+            sample = new float[sampleSize];
+            sp.fetchSample(sample, 0);
+
+            distanceValue = (int)sample[0];
+
+            System.out.println("Iteration: {}, Distance: {}" + i + " "+ distanceValue);
+
+            //sp2 = lineReader.getRedMode();
+
+
+            //System.out.println("" + sp2);
+
+        } */
+
+
+        //TODO:To Stop the motor in case of pkill java for example
+        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
             public void run() {
-                ServerSocket serverSocket = null;
+                System.out.println("Emergency Stop");
+                CSLTruck.motorDrive.stop();
+                CSLTruck.motorSteer.stop();
 
-                try {
-
-                    //System.out.print("port" + serverSocketPort);
-                    serverSocket = new ServerSocket(8000);
-                    if (serverSocket != null) {
-                        while (isRunning) {
-                            Socket clientSocket = serverSocket.accept();
-                            String serverIP = serverSocket.getInetAddress().toString();
-                            System.out.println("Server: " + serverIP + " port: " + "8000");
-                            clientProcessingPool.submit(new CSLTruck .ClientTask(clientSocket));
-                        }
-                    }
-                    else {
-                        System.err.println("Unable to process client request");
-                        System.exit(0);
-                    }
-
-                } catch (IOException e) {
-                    System.err.println("Unable to process client request");
-                    e.printStackTrace();
-                }
-                finally {
-                    if (serverSocket != null) {
-                        try {
-                            serverSocket.close();
-                        } catch (IOException e) {
-                            // log error just in case
-                        }
-                    }
-                }
             }
+        }));
 
-        };
-
-        Thread serverThread = new Thread(serverTask);
-        serverThread.start();
     }
-
-
-
-
-    private class ClientTask implements Runnable {
-
-        private Socket socket;
-
-        private BufferedReader reader;
-        private BufferedWriter writer;
-
-        private final Socket clientSocket;
-
-        private ClientTask(Socket clientSocket) {
-            this.clientSocket = clientSocket;
-        }
-
-        @Override
-        public void run() {
-            System.out.println("Got a connection !");
-
-            //motorDrive.rotate(90);
-
-            CSLTruckSensorSuite sensorSuite = new CSLTruckSensorSuite();
-
-            sensorSuite.printLineValues();
-
-            //open input/output streams
-
-            try {
-                this.reader = new BufferedReader(new InputStreamReader(
-                        socket.getInputStream()));
-
-                String line;
-                while (isRunning) {
-                    line = reader.readLine();
-                    System.out.println("RECEIVED: " + line);
-                    switch (line) {
-                        case "exit":
-                            System.exit(0);
-                    }
-                }
-
-
-            } catch(Exception e) {
-                // Error handling code...
-                throw new RuntimeException(e.getMessage());
-            }
-
-            try {
-                this.writer = new BufferedWriter(new OutputStreamWriter(
-                        socket.getOutputStream()));
-
-                String outputValue = this.socket.getLocalSocketAddress().toString();
-                this.writer.write(outputValue+"\n"); this.writer.flush();
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            // Do whatever required to process the client's request
-
-            try {
-                this.reader.close();
-                this.writer.close();
-                this.clientSocket.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    } */
-
+}
