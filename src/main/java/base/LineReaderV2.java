@@ -2,9 +2,7 @@ package base;
 
 import ev3dev.sensors.BaseSensor;
 import lejos.hardware.port.Port;
-//import lejos.hardware.sensor.SensorMode;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
