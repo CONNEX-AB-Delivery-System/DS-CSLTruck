@@ -34,6 +34,8 @@ class CSLTRun extends Thread {
                 //DeliveryTruck.isRunning should be checked as often as possible
                 //to allow stop from SCS
 
+                //TODO: YOUR CODE HERE
+
                 //System.out.println("Current value" + DeliveryTruck.lineReader.getPIDValue());
 
                 System.out.println( "DTRun cmd " +  CSLTruck.inputCommandSCS );

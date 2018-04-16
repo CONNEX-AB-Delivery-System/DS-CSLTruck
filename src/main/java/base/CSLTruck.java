@@ -33,7 +33,6 @@ public class CSLTruck {
     //Configuration
     private static int HALF_SECOND = 500;
 
-    //TODO: synhronize isRunning variable between threads
     //Synchronization variables between threads to allow intra thread communication
     //Main variable for stopping execution
     static boolean isRunning = true;
@@ -49,21 +48,19 @@ public class CSLTruck {
     //motor for steering - connected to motor port C
     public static EV3MediumRegulatedMotor motorSteer;
 
-    //motor for crane lifting - connected multiplexer port M1
-    private static EV3LargeRegulatedMotor craneRotation;
-    //motor for crane lifting - connected to motor port B
-    public static EV3MediumRegulatedMotor craneLift;
-    //motor for grabber - connected to motor port A
+    //motor for crane lifting - connected to motor port //TODO: port?
+    public static EV3LargeRegulatedMotor craneLift;
+    //motor for grabber - connected to motor port A //TODO: port?
     public static EV3MediumRegulatedMotor craneGrabber;
 
-    //sensor for proximity - connect to sensor port S1
+    //sensor for proximity - connect to sensor port S1 //TODO: port?
     public static EV3IRSensor sensorProximity;
-    //sensor for line reading - connected to sensor port S3
+    //sensor for line reading - connected to sensor port S4 //TODO: port?
     public static LineReaderV2 lineReader;
 
 
 
-    public static void main(final String[] args) throws IOException {
+    public static void main(final String[] args) {
         CSLTRun runThread;
 
         double minVoltage = 7.200;
@@ -76,11 +73,11 @@ public class CSLTruck {
             System.exit(0);
         }
 
-        //initalize all motors here
+        //initialize all motors here
         motorDrive = new EV3LargeRegulatedMotor(MotorPort.C);
         motorSteer = new EV3MediumRegulatedMotor(MotorPort.A);
         System.out.println("Motor initialized");
-        //initalize all sensors here
+        //initialize all sensors here
         //lineReader = new LineReaderV2(SensorPort.S1);
         //sensorProximity = new EV3UltrasonicSensor(SensorPort.S3);
         //DeliveryTruck.sensorProximity.enable();
