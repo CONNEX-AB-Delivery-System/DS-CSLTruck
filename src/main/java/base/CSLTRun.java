@@ -35,9 +35,11 @@ class CSLTRun extends Thread {
                 //to allow stop from SCS
 
                 //TODO: YOUR CODE HERE
+                //TODO: CHECK THIS DOCUMENTATION TO UNDERSTAND HOW TO RUN THIS TRUCK
+                //TODO: AND HOW TO WRITE CODE:
+                //https://github.com/CONNEX-AB-Delivery-System/DS-CSLTruck/blob/master/README.md
 
-                //System.out.println("Current value" + DeliveryTruck.lineReader.getPIDValue());
-
+                System.out.println("LineReader value" + CSLTruck.lineReader.getPIDValue());
 
                 CSLTruck.motorSteer.setSpeed(200);
                 CSLTruck.motorSteer.rotateTo(20, true);
@@ -50,26 +52,6 @@ class CSLTRun extends Thread {
                 CSLTruck.runThreadIsExecuted = true;
                 CSLTruck.outputCommandSCS = "FINISHED";
                 System.out.println("Task Executed");
-
-                /*DeliveryTruck.motorSteer.brake();
-                DeliveryTruck.motorSteer.setSpeed(100);
-                DeliveryTruck.motorSteer.forward();
-                Thread.sleep(200);
-                DeliveryTruck.motorSteer.stop();
-
-                DeliveryTruck.motorSteer.setSpeed(100);
-                DeliveryTruck.motorSteer.backward();
-                Thread.sleep(200);
-                DeliveryTruck.motorSteer.stop();
-
-                DeliveryTruck.motorDrive.setSpeed(300);
-                DeliveryTruck.motorDrive.backward();
-                Thread.sleep(500);
-                DeliveryTruck.motorDrive.stop();*/
-
-                CSLTruck.runThreadIsExecuted = true;
-                CSLTruck.outputCommandSCS = "FINISHED";
-                System.out.println("Task executed");
 
             }
 

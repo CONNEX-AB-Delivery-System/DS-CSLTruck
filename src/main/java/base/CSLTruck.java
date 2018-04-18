@@ -43,19 +43,19 @@ public class CSLTruck {
     static boolean runThreadIsStarted = false;
     static boolean runThreadIsExecuted = false;
 
-    //motor for drive forwards and backwards - connected to motor port D
+    //motor for drive forwards and backwards - connected to motor port D //TODO: port?
     public static EV3LargeRegulatedMotor motorDrive;
-    //motor for steering - connected to motor port C
+    //motor for steering - connected to motor port C //TODO: port?
     public static EV3MediumRegulatedMotor motorSteer;
 
     //motor for crane lifting - connected to motor port //TODO: port?
     public static EV3LargeRegulatedMotor craneLift;
-    //motor for grabber - connected to motor port A //TODO: port?
+    //motor for grabber - connected to motor port A
     public static EV3MediumRegulatedMotor craneGrabber;
 
-    //sensor for proximity - connect to sensor port S1 //TODO: port?
+    //sensor for proximity - connect to sensor port S1
     public static EV3IRSensor sensorProximity;
-    //sensor for line reading - connected to sensor port S4 //TODO: port?
+    //sensor for line reading - connected to sensor port S4
     public static LineReaderV2 lineReader;
 
 
@@ -65,22 +65,23 @@ public class CSLTruck {
 
         double minVoltage = 7.200;
 
-        //Always check if battery voltage is enougth
+        //Always check if battery voltage is enough
         System.out.println("Battery Voltage: " + Battery.getInstance().getVoltage());
         System.out.println("Battery Current: " + Battery.getInstance().getBatteryCurrent());
         if (Battery.getInstance().getVoltage() < minVoltage) {
-            System.out.println("Battery voltage to low, shutdown");
+            System.out.println("Battery voltage to low, shutdown. Please change batteries on truck");
             System.exit(0);
         }
 
         //initialize all motors here
         motorDrive = new EV3LargeRegulatedMotor(MotorPort.C);
-        motorSteer = new EV3MediumRegulatedMotor(MotorPort.A);
+        motorSteer = new EV3MediumRegulatedMotor(MotorPort.B);
+        craneLift = new EV3LargeRegulatedMotor(MotorPort.D);
+        craneGrabber = new EV3MediumRegulatedMotor(MotorPort.A);
         System.out.println("Motor initialized");
         //initialize all sensors here
-        //lineReader = new LineReaderV2(SensorPort.S1);
-        //sensorProximity = new EV3UltrasonicSensor(SensorPort.S3);
-        //DeliveryTruck.sensorProximity.enable();
+        lineReader = new LineReaderV2(SensorPort.S4);
+        sensorProximity = new EV3IRSensor(SensorPort.S1);
         System.out.println("Sensors initialized");
 
 
@@ -90,6 +91,22 @@ public class CSLTruck {
         runThreadIsExecuted = false;
         runThreadIsStarted = true;
         runThread.start();
+
+
+        //wait for some time till run thread is executed
+        if (!runThreadIsExecuted) {
+            try {
+                Thread.sleep(10 * 100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        } else {
+            inputCommandSCS = "";
+            runThreadIsStarted = false;
+            isRunning = false;
+        }
+
+        System.exit(0);
 
 
         //open thread for socket server to listen/send commands to SCS
@@ -145,21 +162,7 @@ public class CSLTruck {
         server.stopServerSocket();
         */
 
-
-        //wait for some time till run thread is executed
-        if (!runThreadIsExecuted) {
-            try {
-                Thread.sleep(10 * 100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        } else {
-            inputCommandSCS = "";
-            runThreadIsStarted = false;
-            isRunning = false;
-        }
-
-        System.exit(0);
+        //System.exit(0);
 
 
         /*
