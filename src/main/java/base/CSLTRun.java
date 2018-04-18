@@ -38,15 +38,18 @@ class CSLTRun extends Thread {
 
                 //System.out.println("Current value" + DeliveryTruck.lineReader.getPIDValue());
 
-                System.out.println( "DTRun cmd " +  CSLTruck.inputCommandSCS );
+
+                CSLTruck.motorSteer.setSpeed(200);
+                CSLTruck.motorSteer.rotateTo(20, true);
+
                 Thread.sleep(500);
 
-                System.out.println("Rotate motor " +  this.threadName );
-                CSLTruck.motorSteer.rotateTo(15, true);
-                Thread.sleep(500);
-                System.out.println("Rotate motor 2 " +  this.threadName );
+                CSLTruck.motorSteer.setSpeed(200);
                 CSLTruck.motorSteer.rotateTo(-20, true);
-                Thread.sleep(100);
+
+                CSLTruck.runThreadIsExecuted = true;
+                CSLTruck.outputCommandSCS = "FINISHED";
+                System.out.println("Task Executed");
 
                 /*DeliveryTruck.motorSteer.brake();
                 DeliveryTruck.motorSteer.setSpeed(100);
