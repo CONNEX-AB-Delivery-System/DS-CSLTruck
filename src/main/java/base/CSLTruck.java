@@ -74,8 +74,8 @@ public class CSLTruck {
         }
 
         //initialize all motors here
-        motorDrive = new EV3LargeRegulatedMotor(MotorPort.C);
-        motorSteer = new EV3MediumRegulatedMotor(MotorPort.B);
+        motorDrive = new EV3LargeRegulatedMotor(MotorPort.B);
+        motorSteer = new EV3MediumRegulatedMotor(MotorPort.C);
         craneLift = new EV3LargeRegulatedMotor(MotorPort.D);
         craneGrabber = new EV3MediumRegulatedMotor(MotorPort.A);
         System.out.println("Motor initialized");
@@ -96,7 +96,7 @@ public class CSLTruck {
         //wait for some time till run thread is executed
         if (!runThreadIsExecuted) {
             try {
-                Thread.sleep(10 * 100);
+                Thread.sleep(10 * 1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
