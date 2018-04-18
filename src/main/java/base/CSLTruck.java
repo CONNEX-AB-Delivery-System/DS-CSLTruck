@@ -83,11 +83,20 @@ public class CSLTruck {
         //DeliveryTruck.sensorProximity.enable();
         System.out.println("Sensors initialized");
 
-        //open thread for socket server to listen/send commands to SCS
-        CSLTThreadPooledServer server = new CSLTThreadPooledServer("ServerThread-1", 8000);
-        server.start();
 
-        while (isRunning) {
+        //open thread for executing "run" task
+        runThread = new CSLTRun( "RunThread-1");
+        //add "run" task and "run executed" flags
+        runThreadIsExecuted = false;
+        runThreadIsStarted = true;
+        runThread.start();
+
+
+        //open thread for socket server to listen/send commands to SCS
+        //CSLTThreadPooledServer server = new CSLTThreadPooledServer("ServerThread-1", 8000);
+        //server.start();
+
+        /*while (isRunning) {
             //first, check if have received "kill" command from SCS
             if (inputCommandSCS.equals("KILL")) {
                 //then stop everything
@@ -134,6 +143,7 @@ public class CSLTruck {
         //Stop server to release socket bind
         System.out.println("Stopping Server");
         server.stopServerSocket();
+        */
 
         //motorSteer.close();
         //motorDrive.close();
