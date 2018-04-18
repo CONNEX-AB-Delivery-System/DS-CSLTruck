@@ -46,6 +46,19 @@ remotes {
 - remoteRun (Execute a jar deployed on your Brick)
 - deployAndRun (Deploy & Execute from your Computer the program that you configured on the file: MANIFEST.MF)
 
+# About CSLTruck
+
+motors
++[one EV3 Large Motor] for driving to run front wheel drive system. Documentation here: <a href="http://ev3dev-lang-java.github.io/docs/api/latest/ev3dev-lang-java/ev3dev/actuators/lego/motors/EV3LargeRegulatedMotor.html">Javadocs</a>
++[one EV3 Medium Motor] for steering to run back wheel steering system
++[one EV3 Large Motor] for lifting crane 
++[one EV3 Medium Motor] for grabbing container
++
+sensors
++[one EV3 Infrared Sensor] for measuring distance to detect obstacles 
++[one mindstormsLineReaderV2 Sensor Line] for measuring line reflection to follow the line 
+
+
 # Documenatation of system
 
 ## General information
