@@ -56,8 +56,8 @@ motors
 
 
 sensors
-+[one EV3 Infrared Sensor] for measuring distance to detect obstacles. Documentation here: <a href="http://ev3dev-lang-java.github.io/docs/api/latest/ev3dev-lang-java/ev3dev/sensors/ev3/EV3IRSensor.html">Javadocs</a> and <a href="http://docs.ev3dev.org/projects/lego-linux-drivers/en/ev3dev-jessie/sensor_data.html#lego-ev3-ir">Sensor capabilities</a>
-+[one mindstormsLineReaderV2 Sensor Line] for measuring line reflection to follow the line. Documentation here: <a href="https://github.com/CONNEX-AB-Delivery-System/DS-CSLTruck/blob/master/src/main/java/base/LineReaderV2.java">Javadocs</a> and <a href="http://docs.ev3dev.org/projects/lego-linux-drivers/en/ev3dev-jessie/sensor_data.html#ms-line-leader">Sensor capabilities</a>
+-[one EV3 Infrared Sensor] for measuring distance to detect obstacles. Documentation here: <a href="http://ev3dev-lang-java.github.io/docs/api/latest/ev3dev-lang-java/ev3dev/sensors/ev3/EV3IRSensor.html">Javadocs</a> and <a href="http://docs.ev3dev.org/projects/lego-linux-drivers/en/ev3dev-jessie/sensor_data.html#lego-ev3-ir">Sensor capabilities</a>
+-[one mindstormsLineReaderV2 Sensor Line] for measuring line reflection to follow the line. Documentation here: <a href="https://github.com/CONNEX-AB-Delivery-System/DS-CSLTruck/blob/master/src/main/java/base/LineReaderV2.java">Javadocs</a> and <a href="http://docs.ev3dev.org/projects/lego-linux-drivers/en/ev3dev-jessie/sensor_data.html#ms-line-leader">Sensor capabilities</a>
 
 
 # Documenatation of system
