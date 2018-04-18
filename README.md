@@ -46,8 +46,6 @@ remotes {
 - remoteRun (Execute a jar deployed on your Brick)
 - deployAndRun (Deploy & Execute from your Computer the program that you configured on the file: MANIFEST.MF)
 
-6) Open SCS software, type in IP of Truck, push Connect. After SCS shows it has been conected to Truck, type in command "run" and Truck will start to do things you developed. Once done, type in command "kill" to stop software on Truck. 
-
 # Documenatation of system
 
 ## General information
