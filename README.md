@@ -49,14 +49,15 @@ remotes {
 # About CSLTruck
 
 motors
-+[one EV3 Large Motor] for driving to run front wheel drive system. Documentation here: <a href="http://ev3dev-lang-java.github.io/docs/api/latest/ev3dev-lang-java/ev3dev/actuators/lego/motors/EV3LargeRegulatedMotor.html">Javadocs</a>
-+[one EV3 Medium Motor] for steering to run back wheel steering system
-+[one EV3 Large Motor] for lifting crane 
-+[one EV3 Medium Motor] for grabbing container
-+
+- [one EV3 Large Motor] for driving to run front wheel drive system. Documentation here: <a href="http://ev3dev-lang-java.github.io/docs/api/latest/ev3dev-lang-java/ev3dev/actuators/lego/motors/EV3LargeRegulatedMotor.html">Javadocs</a>
+- [one EV3 Medium Motor] for steering to run back wheel steering system. Documentation here: <a href="http://ev3dev-lang-java.github.io/docs/api/latest/ev3dev-lang-java/ev3dev/actuators/lego/motors/EV3MediumRegulatedMotor.html">Javadocs</a>
+- [one EV3 Large Motor] for lifting crane. Documentation here: <a href="http://ev3dev-lang-java.github.io/docs/api/latest/ev3dev-lang-java/ev3dev/actuators/lego/motors/EV3LargeRegulatedMotor.html">Javadocs</a>
+- [one EV3 Medium Motor] for grabbing container. Documentation here: <a href="http://ev3dev-lang-java.github.io/docs/api/latest/ev3dev-lang-java/ev3dev/actuators/lego/motors/EV3MediumRegulatedMotor.html">Javadocs</a>
+
+
 sensors
-+[one EV3 Infrared Sensor] for measuring distance to detect obstacles 
-+[one mindstormsLineReaderV2 Sensor Line] for measuring line reflection to follow the line 
++[one EV3 Infrared Sensor] for measuring distance to detect obstacles. Documentation here: <a href="http://ev3dev-lang-java.github.io/docs/api/latest/ev3dev-lang-java/ev3dev/sensors/ev3/EV3IRSensor.html">Javadocs</a> and <a href="http://docs.ev3dev.org/projects/lego-linux-drivers/en/ev3dev-jessie/sensor_data.html#lego-ev3-ir">Sensor capabilities</a>
++[one mindstormsLineReaderV2 Sensor Line] for measuring line reflection to follow the line. Documentation here: <a href="https://github.com/CONNEX-AB-Delivery-System/DS-CSLTruck/blob/master/src/main/java/base/LineReaderV2.java">Javadocs</a> and <a href="http://docs.ev3dev.org/projects/lego-linux-drivers/en/ev3dev-jessie/sensor_data.html#ms-line-leader">Sensor capabilities</a>
 
 
 # Documenatation of system
@@ -67,11 +68,16 @@ LEGO brick is running on Debian-based operating system ev3dev: https://github.co
 
 And is programmed in JAVA: http://ev3dev-lang-java.github.io/#/. JAVA programms are deployed on brick by using Gradle,
 to see how it is done, follow this link: http://ev3dev-lang-java.github.io/docs/support/getting_started/create-your-first-project.html.
-(also Git repo for example source code available here: https://github.com/ev3dev-lang-java/template_project_gradle).
 
-## Modify the example
+## Examples
 
-In order to modify the example, current full APIs are:
+Exist several examples ready to use here:
+
+https://github.com/ev3dev-lang-java/examples
+
+Another Git repo for example source code available here: https://github.com/ev3dev-lang-java/template_project_gradle).
+
+In order to modify examples, current full APIs are:
 
 http://ev3dev-lang-java.github.io/docs/api/latest/index.html
 
@@ -82,12 +88,6 @@ And classes: EV3ColorSensor, EV3IRSensor, EV3TouchSensor, EV3UltrasonicSensor <b
 
 You mostly will use EV3 Motors in package: ev3dev.actuators.lego.motors <br />
 And classes: EV3LargeRegulatedMotor, EV3MediumRegulatedMotor
-
-## Examples
-
-Exist several examples ready to use here:
-
-https://github.com/ev3dev-lang-java/examples
 
 ## Sensors and Motors
 
