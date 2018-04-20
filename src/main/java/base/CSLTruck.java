@@ -94,16 +94,20 @@ public class CSLTruck {
 
 
         //wait for some time till run thread is executed
-        if (!runThreadIsExecuted) {
+        while (!runThreadIsExecuted)
+        {
+            System.out.println("thread exe" + runThreadIsExecuted);
             try {
-                Thread.sleep(10 * 1000);
+                Thread.sleep(10 * 100);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-        } else {
-            inputCommandSCS = "";
-            runThreadIsStarted = false;
-            isRunning = false;
+
+            if (runThreadIsExecuted) {
+                inputCommandSCS = "";
+                runThreadIsStarted = false;
+                isRunning = false;
+            }
         }
 
         System.exit(0);

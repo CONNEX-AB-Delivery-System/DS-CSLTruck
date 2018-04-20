@@ -42,12 +42,12 @@ class CSLTRun extends Thread {
                 System.out.println("LineReader value" + CSLTruck.lineReader.getPIDValue());
 
                 CSLTruck.motorSteer.setSpeed(200);
-                CSLTruck.motorSteer.rotateTo(40, true);
+                CSLTruck.motorSteer.rotate(40, true);
 
                 Thread.sleep(1000);
 
                 CSLTruck.motorSteer.setSpeed(200);
-                CSLTruck.motorSteer.rotateTo(-40, true);
+                CSLTruck.motorSteer.rotate(-40, true);
 
                 Thread.sleep(1000);
 
