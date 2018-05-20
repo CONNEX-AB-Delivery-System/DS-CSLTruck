@@ -1,5 +1,7 @@
 package base;
 
+import ev3dev.actuators.lego.motors.EV3LargeRegulatedMotor;
+import ev3dev.actuators.lego.motors.EV3MediumRegulatedMotor;
 import lejos.robotics.SampleProvider;
 import ev3dev.sensors.BaseSensor;
 import lejos.hardware.port.Port;
@@ -25,7 +27,273 @@ class CSLTRun extends Thread {
         System.out.println("Creating " +  this.threadName );
     }
 
+
+    private boolean safeRotateTo(EV3MediumRegulatedMotor motor, int rotationAngle, int rotationSpeed, String name) throws InterruptedException {
+        int count = 0;
+        int tachocount = 0;
+        int prevtachocount;
+        boolean rotationDirectionForward;
+
+        //constant for deciding if there enter speedy or precision rotation
+        int minRotationConstant = 200;
+        int precisionAdjustmentSpeed = 100;
+
+        boolean stopFlag = false;
+        int stopLiftConstant = rotationAngle/(rotationSpeed/20)+50;
+
+
+        //check direction of rotation
+        if (tachocount < rotationAngle) {
+            rotationDirectionForward = true;
+        }
+        else {
+            rotationDirectionForward = false;
+        }
+
+        count = 0;
+        System.out.println(name + "$ -rotate motor -angle: " + rotationAngle);
+        motor.setSpeed(rotationSpeed);
+        motor.rotate(rotationAngle, true);
+        prevtachocount = 0;
+        tachocount = motor.getTachoCount();
+
+        //enter main loop only if there is enough angle to rotate, else go for adjust mode
+        if (rotationAngle > minRotationConstant) {
+
+            //rotationAngle-50 ensures that we start to stop before reaching rotation angle, to allow motor time to stop
+            //Fail safe check - motor.isMoving() checks if motor is rotating, if not, exit
+            //Fail safe check - stopLiftConstant - for whatever reason motor doesn't stop and while is looping, stopLiftConstant ensures that there will be timeout
+
+            while (tachocount < (rotationAngle-(minRotationConstant/2)) && (motor.isMoving() && count <= stopLiftConstant ) ) {
+
+                prevtachocount = tachocount;
+                tachocount = motor.getTachoCount();
+
+                //Fail safe check - check if we are going in right direction, based on rotationDirectionForward variable
+                if (rotationDirectionForward) {
+                    if (prevtachocount > tachocount) {
+                        count = stopLiftConstant;
+                        stopFlag = true;
+                    }
+                }
+                else {
+                    if (prevtachocount < tachocount) {
+                        count = stopLiftConstant;
+                        stopFlag = true;
+                    }
+                }
+
+                count++;
+                Thread.sleep(20);
+            }
+
+            motor.stop();
+            Thread.sleep(100); //thread sleep to allow motor time to coast to stop.
+
+            tachocount = motor.getTachoCount();
+            System.out.println(name + "$ -motor rotated -angle: " + rotationAngle + " -tacos: " + tachocount);
+        }
+
+        //check if previous operation was successful, if not, don't do adjustment
+        if (!stopFlag) {
+            //adjust mode, does final adjustment of rotation in slower speed for more precision
+            if (tachocount < rotationAngle) {
+                System.out.println(name + "$ -adjust motor position -for angle: " + (rotationAngle-tachocount));
+                motor.setSpeed(precisionAdjustmentSpeed);
+                motor.rotate((rotationAngle-tachocount), true);
+                while ((tachocount < rotationAngle) && motor.isMoving()) {
+                    Thread.sleep(10);
+                }
+            }
+            motor.stop();
+            Thread.sleep(100);
+            System.out.println(name + "$ -motor rotated -final tacos: " + motor.getTachoCount());
+        }
+
+        if (stopFlag) {
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
+
+    private boolean safeRotateTo(EV3LargeRegulatedMotor motor, int rotationAngle, int rotationSpeed, String name)
+            throws InterruptedException {
+
+        int count = 0;
+        int tachocount = motor.getTachoCount();
+        int prevtachocount;
+        boolean rotationDirectionForward;
+
+        //constant for deciding if there enter speedy or precision rotation
+        int minRotationConstant = 200;
+        int precisionAdjustmentSpeed = 50;
+
+        boolean stopFlag = false;
+        int stopLiftConstant = rotationAngle/(rotationSpeed/40)+50;
+
+
+        //check direction of rotation
+        if (rotationAngle > tachocount) {
+            rotationDirectionForward = true;
+        }
+        else {
+            rotationDirectionForward = false;
+        }
+
+        //enter main loop only if there is enough angle to rotate, else go for adjust mode
+        if (Math.abs(rotationAngle) > minRotationConstant) {
+
+            count = 0;
+            System.out.println(name + "$ -rotate motor -angle: " + rotationAngle + " -direction: " + rotationDirectionForward);
+            motor.setSpeed(rotationSpeed);
+            motor.rotateTo(rotationAngle, true);
+            tachocount = motor.getTachoCount();
+
+            //rotationAngle-50 ensures that we start to stop before reaching rotation angle, to allow motor time to stop
+            //Fail safe check - motor.isMoving() checks if motor is rotating, if not, exit
+            //Fail safe check - stopLiftConstant - for whatever reason motor doesn't stop and while is looping, stopLiftConstant ensures that there will be timeout
+
+            if (rotationDirectionForward) {
+                while (tachocount < (rotationAngle-(minRotationConstant/2)) && (motor.isMoving() && count <= stopLiftConstant ) ) {
+                    prevtachocount = tachocount;
+                    //Fail safe check - check if we are going in right direction, based on rotationDirectionForward variable
+                    if (prevtachocount > tachocount) {
+                        count = stopLiftConstant;
+                        stopFlag = true;
+                    }
+                    count++;
+                    Thread.sleep(10);
+                    tachocount = motor.getTachoCount();
+                }
+            } else {
+                while (tachocount > (rotationAngle+(minRotationConstant/2)) && (motor.isMoving() && count <= stopLiftConstant ) ) {
+
+                    prevtachocount = tachocount;
+                    //Fail safe check - check if we are going in right direction, based on rotationDirectionForward variable
+
+                    if (prevtachocount < tachocount) {
+                        count = stopLiftConstant;
+                        stopFlag = true;
+                    }
+                    count++;
+                    Thread.sleep(10);
+                    tachocount = motor.getTachoCount();
+                }
+            }
+
+            motor.stop();
+            Thread.sleep(100); //thread sleep to allow motor time to coast to stop.
+
+            tachocount = motor.getTachoCount();
+            System.out.println(name + "$ -crane motor -angle: " + rotationAngle + " -tacos: " + tachocount);
+        }
+
+        //check if previous operation was successful, if not, don't do adjustment
+        if (!stopFlag) {
+            //adjust mode, does final adjustment of rotation in slower speed for more precision
+            motor.setSpeed(precisionAdjustmentSpeed);
+            System.out.println(name + "$ -adjust motor position -for angle: " + (rotationAngle - tachocount) + " -direction: " + rotationDirectionForward);
+            motor.rotate((rotationAngle - tachocount), true);
+
+            if (rotationDirectionForward) {
+                if (tachocount < rotationAngle) {
+                    while ((tachocount < rotationAngle) && motor.isMoving()) {
+                        Thread.sleep(10);
+                    }
+                }
+            }
+            else {
+                if (tachocount > rotationAngle) {
+                    while ((tachocount > rotationAngle) && motor.isMoving()) {
+                        Thread.sleep(10);
+                    }
+                }
+            }
+            motor.stop();
+            Thread.sleep(100);
+            System.out.println(name + "$ -crane rotated -final tacos: " + motor.getTachoCount());
+        }
+
+        if (stopFlag) {
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
+
+
+    private boolean rotateToZero(EV3MediumRegulatedMotor motor, int rotationSpeed, String name) throws InterruptedException {
+
+        int tachocount;
+
+
+        System.out.println(name + "$ -return motor to starting position -tacos-" + motor.getTachoCount());
+        motor.setSpeed(rotationSpeed);
+        motor.rotateTo(0, true);
+        while (motor.isMoving()) {
+            Thread.sleep(50);
+        }
+        motor.stop();
+        Thread.sleep(100);
+
+        tachocount = motor.getTachoCount();
+        System.out.println(name + "$ -check for final adjustment -tacos-" + tachocount);
+        motor.setSpeed(100);
+        motor.rotate(0-tachocount, true);
+        while (motor.isMoving()) {
+            Thread.sleep(10);
+        }
+        System.out.println(name + "$ -motor returned to starting position -tacos-" + motor.getTachoCount());
+
+        return true;
+    }
+
+    private boolean rotateToZero(EV3LargeRegulatedMotor motor, int rotationSpeed, String name) throws InterruptedException {
+
+        int tachocount;
+
+
+        System.out.println(name + "$ -return motor to starting position -tacos-" + motor.getTachoCount());
+        motor.setSpeed(rotationSpeed);
+        motor.rotateTo(0, true);
+        while (motor.isMoving()) {
+            Thread.sleep(20);
+        }
+        motor.stop();
+        Thread.sleep(100);
+
+        tachocount = motor.getTachoCount();
+        System.out.println(name + "$ -check for final adjustment -tacos-" + tachocount);
+        motor.setSpeed(100);
+        motor.rotate(0-tachocount, true);
+        while (motor.isMoving()) {
+            Thread.sleep(10);
+        }
+        System.out.println(name + "$ -motor returned to starting position -tacos-" + motor.getTachoCount());
+
+        return true;
+    }
+
+
     private boolean runMotors() {
+
+        int[] values = new int[8];
+        int pidValue;
+        int stop;
+        int count = 0;
+        int tachocount = 0;
+        int prevtachocount;
+        int motorDriveSpeed = 0;
+
+        int craneLiftSpeed = 500;
+        int lowerCraneConstant = 9250;
+        int grabberConstant = 6400;
+        int craneLiftDriveConstant = 6500;
+        int stopLiftConstant = 200;
+
 
         try {
 
@@ -39,22 +307,146 @@ class CSLTRun extends Thread {
                 //TODO: AND HOW TO WRITE CODE:
                 //https://github.com/CONNEX-AB-Delivery-System/DS-CSLTruck/blob/master/README.md
 
-                System.out.println("LineReader value" + CSLTruck.lineReader.getPIDValue());
+                //TODO: To test in action
+                //safeRotateTo(CSLTruck.craneLift, lowerCraneConstant,500,"craneLift");
 
-                CSLTruck.motorSteer.setSpeed(200);
-                CSLTruck.motorSteer.rotate(40, true);
+                //safeRotateTo(CSLTruck.craneGrabber, grabberConstant,500,"craneGrabber");
 
-                Thread.sleep(1000);
-
-                CSLTruck.motorSteer.setSpeed(200);
-                CSLTruck.motorSteer.rotate(-40, true);
+                //safeRotateTo(CSLTruck.craneLift, craneLiftDriveConstant,500,"craneLift");
 
                 Thread.sleep(1000);
 
-                CSLTruck.motorSteer.setSpeed(200);
+
+                /* Thread.sleep(1000);
+                 CSLTruck.motorSteer.setSpeed(300);
+                 CSLTruck.motorSteer.rotateTo(-80, true);
+                 Thread.sleep(200);
+                 CSLTruck.motorDrive.setSpeed(200);
+                 CSLTruck.motorDrive.forward();
+                 Thread.sleep(9500);
+                 CSLTruck.motorDrive.stop(true);
+
+                 Thread.sleep(500);
+
+                 CSLTruck.motorSteer.setSpeed(300);
+                 CSLTruck.motorSteer.rotateTo(80, true);
+                 Thread.sleep(200);
+                 CSLTruck.motorDrive.setSpeed(200);
+                 CSLTruck.motorDrive.backward();
+                 Thread.sleep(9000);
+                 CSLTruck.motorDrive.stop(true);
+
+                 Thread.sleep(500);
+
+                 CSLTruck.motorSteer.setSpeed(300);
+                 CSLTruck.motorSteer.rotateTo(0, true);
+                 Thread.sleep(200);
+
+                 Thread.sleep(1000);
+
+                */
+
+                values = CSLTruck.lineReader.getCALValues();
+                Thread.sleep(200);
+                values = CSLTruck.lineReader.getCALValues();
+                pidValue = NewPID.calculatePID(values);
+
+                System.out.print(" V0: " + values[0]);
+                System.out.print(" V1: " + values[1]);
+                System.out.print(" V2: " + values[2]);
+                System.out.print(" V3: " + values[3]);
+                System.out.print(" V4: " + values[4]);
+                System.out.print(" V5: " + values[5]);
+                System.out.print(" V6: " + values[6]);
+                System.out.print(" V7: " + values[7]);
+                System.out.println(" pidValue: " + pidValue);
+
+                //start moving only if truck is on line
+                if (pidValue < 20 & pidValue > -20) {
+                    System.out.println("move: " + pidValue);
+                    motorDriveSpeed = 100;
+                    CSLTruck.motorDrive.setSpeed(motorDriveSpeed);
+                    CSLTruck.motorDrive.backward();
+                    CSLTruck.motorSteer.setSpeed(500);
+                }
+
+                int stopnum = 200;
+                pidValue = 0;
+
+                for(int i = 0; i < stopnum; i++){
+
+                    values = CSLTruck.lineReader.getCALValues();
+                    pidValue = NewPID.calculatePID(values);
+
+                    stop = (values[0] + values[1] + values[2] + values [3] + values [4] + values[5] + values[6] + values[7]) / 8;
+
+                    System.out.print(" V0: " + values[0]);
+                    System.out.print(" V1: " + values[1]);
+                    System.out.print(" V2: " + values[2]);
+                    System.out.print(" V3: " + values[3]);
+                    System.out.print(" V4: " + values[4]);
+                    System.out.print(" V5: " + values[5]);
+                    System.out.print(" V6: " + values[6]);
+                    System.out.print(" V7: " + values[7]);
+
+                    if ((stop < 35) | (stop > 90))
+                    {
+                        System.out.println("followTheLine$ Stop: " + stop);
+                        CSLTruck.motorDrive.stop();
+                        i = stopnum;
+                    }
+                    else {
+                        System.out.println(" -i" + i +" pidValue: " + pidValue);
+
+                        if (pidValue > 23) {
+                            CSLTruck.motorSteer.rotateTo(-69, true);
+                        }
+                        else if (pidValue < -23) {
+                            CSLTruck.motorSteer.rotateTo(69, true);
+                        }
+                        else {
+                            CSLTruck.motorSteer.rotateTo(-pidValue * 3, true);
+                        }
+                        Thread.sleep(50);
+
+                        if (((pidValue < -20) | (pidValue > 20)) && (motorDriveSpeed == 100)) {
+                            motorDriveSpeed = 50;
+                            CSLTruck.motorDrive.setSpeed(motorDriveSpeed);
+                        }
+                        if (((pidValue > -20) & (pidValue < 20)) && (motorDriveSpeed == 50)) {
+                            motorDriveSpeed = 100;
+                            CSLTruck.motorDrive.setSpeed(motorDriveSpeed);
+                        }
+
+                    }
+
+                }
+
+                CSLTruck.motorDrive.stop(true);
                 CSLTruck.motorSteer.rotateTo(0, true);
 
+                Thread.sleep(200);
+
+                rotateToZero(CSLTruck.craneGrabber, craneLiftSpeed, "craneGrabber");
+
+                rotateToZero(CSLTruck.craneLift, craneLiftSpeed, "craneLift");
+
+                /*
+                CSLTruck.craneGrabber.setSpeed(500);
+                CSLTruck.craneGrabber.backward();
+                Thread.sleep(8000);
+                CSLTruck.craneGrabber.stop(true);
+                */
+                //Anna har antecknat graderna.
+
+                /*
                 Thread.sleep(1000);
+
+                CSLTruck.craneLift.setSpeed(500);
+                CSLTruck.craneLift.rotateTo(5000,false);
+                CSLTruck.craneLift.stop(true);
+                Thread.sleep(1000);
+                */
 
                 CSLTruck.runThreadIsExecuted = true;
                 CSLTruck.outputCommandSCS = "FINISHED";

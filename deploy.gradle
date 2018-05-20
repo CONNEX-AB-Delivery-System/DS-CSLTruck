@@ -32,8 +32,10 @@ task remoteRun << {
 task remoteSudoRun << {
     ssh.run {
         session(remotes.ev3dev) {
-            println "echo -e \"maker\" | sudo -S java -server -jar /home/robot/" + "${rootProject.name}" + "-" + version + "-all" + ".jar"
-            execute "echo -e \"maker\" | sudo -S java -server -jar /home/robot/" + "${rootProject.name}" + "-" + version + "-all" + ".jar"
+            println "sudo -S java -server -jar /home/robot/" + "${rootProject.name}" + "-" + version + "-all" + ".jar"
+            execute "sudo -S java -server -jar /home/robot/" + "${rootProject.name}" + "-" + version + "-all" + ".jar"
+            println "echo -e \"maker\""
+            execute "echo -e \"maker\""
         }
     }
 }

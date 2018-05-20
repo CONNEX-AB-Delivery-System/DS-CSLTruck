@@ -63,7 +63,7 @@ public class CSLTruck {
     public static void main(final String[] args) {
         CSLTRun runThread;
 
-        double minVoltage = 7.200;
+        double minVoltage = 7.500;
 
         //Always check if battery voltage is enough
         System.out.println("Battery Voltage: " + Battery.getInstance().getVoltage());
@@ -81,7 +81,7 @@ public class CSLTruck {
         System.out.println("Motor initialized");
         //initialize all sensors here
         lineReader = new LineReaderV2(SensorPort.S4);
-        sensorProximity = new EV3IRSensor(SensorPort.S1);
+        //sensorProximity = new EV3IRSensor(SensorPort.S1);
         System.out.println("Sensors initialized");
 
 
@@ -96,7 +96,7 @@ public class CSLTruck {
         //wait for some time till run thread is executed
         while (!runThreadIsExecuted)
         {
-            System.out.println("thread exe" + runThreadIsExecuted);
+            //System.out.println("thread exe" + runThreadIsExecuted);
             try {
                 Thread.sleep(10 * 100);
             } catch (InterruptedException e) {
