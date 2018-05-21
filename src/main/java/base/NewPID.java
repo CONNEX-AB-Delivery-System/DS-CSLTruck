@@ -81,12 +81,12 @@ public class NewPID {
         thresholdCut.remove(minIndex2);
 
         // checking if the selected values are below threshold
-        if (min[0] > thresholdValue || min[1] > thresholdValue){
+        if (min[0] > thresholdValue | min[1] > thresholdValue){
             return -100;
         }
 
         //checking if the cells are neighbors
-        if ((minIndex1 - minIndex2) != 1 || (minIndex1 - minIndex2) != -1){
+        if (Math.abs(minIndex1 - minIndex2) > 1){
             return  -100;
         }
 
@@ -106,10 +106,10 @@ public class NewPID {
 
 
         if (calculationIndex == 0){
-            PIDValue = -45 + f(x1, x2);
+            PIDValue = -60 + f(x1, x2);
         }
         else if (calculationIndex == 1){
-            PIDValue = -30 + f(x1, x2);
+            PIDValue = -40 + f(x1, x2);
         }
         else if (calculationIndex == 2){
             PIDValue = -15 + f(x1, x2);
@@ -121,21 +121,21 @@ public class NewPID {
             PIDValue = 15 + f(x1, x2);
         }
         else if (calculationIndex == 5){
-            PIDValue = 30 + f(x1, x2);
+            PIDValue = 40 + f(x1, x2);
         }
         else if (calculationIndex == 6){
-            PIDValue = 45 + f(x1, x2);
+            PIDValue = 60 + f(x1, x2);
         }
 
         return PIDValue;
     }
 
     private static int f(int x1, int x2){
-        if ((x1 - x2) > 15){
-            return 15 / 2;
+        if ((x1 - x2) > 14){
+            return 14;
         }
-        else if ((x1 - x2) < -15){
-            return -15 / 2;
+        else if ((x1 - x2) < -14){
+            return -14;
         }
         else{
             return (x1 - x2) / 2;

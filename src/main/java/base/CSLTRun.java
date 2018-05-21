@@ -281,8 +281,11 @@ class CSLTRun extends Thread {
     private boolean runMotors() {
 
         int[] values = new int[8];
+        int pidPrev;
         int pidValue;
+        int pidAverage;
         int stop;
+        int pidflag;
         int count = 0;
         int tachocount = 0;
         int prevtachocount;
@@ -349,7 +352,7 @@ class CSLTRun extends Thread {
                 values = CSLTruck.lineReader.getCALValues();
                 Thread.sleep(200);
                 values = CSLTruck.lineReader.getCALValues();
-                pidValue = NewPID.calculatePID(values, 50);
+                pidValue = NewPID.calculatePID(values, 60);
 
                 System.out.print(" V0: " + values[0]);
                 System.out.print(" V1: " + values[1]);
@@ -362,7 +365,7 @@ class CSLTRun extends Thread {
                 System.out.println(" pidValue: " + pidValue);
 
                 //start moving only if truck is on line
-                if (pidValue < 20 & pidValue > -20) {
+                if (pidValue < 25 & pidValue > -25) {
                     System.out.println("move: " + pidValue);
                     motorDriveSpeed = 100;
                     CSLTruck.motorDrive.setSpeed(motorDriveSpeed);
@@ -371,43 +374,68 @@ class CSLTRun extends Thread {
                 }
 
                 int stopnum = 200;
-                pidValue = 0;
+                pidAverage = 0;
 
                 for(int i = 0; i < stopnum; i++){
 
-                    values = CSLTruck.lineReader.getCALValues();
-                    pidValue = NewPID.calculatePID(values, 50);
+                    pidPrev = pidAverage;
+                    pidValue = 0;
+                    pidAverage = 0;
+                    pidflag = 0;
+
+                    for (int j = 0; j <= 2; j++)  {
+                        values = CSLTruck.lineReader.getCALValues();
+                        System.out.print(" V0: " + values[0]);
+                        System.out.print(" V1: " + values[1]);
+                        System.out.print(" V2: " + values[2]);
+                        System.out.print(" V3: " + values[3]);
+                        System.out.print(" V4: " + values[4]);
+                        System.out.print(" V5: " + values[5]);
+                        System.out.print(" V6: " + values[6]);
+                        System.out.print(" V7: " + values[7]);
+
+                        pidValue = NewPID.calculatePID(values, 60);
+                        System.out.println(" -i" + i +" pidValue: " + pidValue);
+                        
+                        if (pidValue == -100) {
+                            pidflag = 1;
+                        }
+                        else {
+                            pidAverage = pidAverage + pidValue;
+                        }
+                    }
+
+                    if (pidflag == 1) {
+                        pidAverage = pidPrev;
+                    }
+                    else {
+                        pidValue = pidAverage / 2;
+                    }
+
 
                     stop = (values[0] + values[1] + values[2] + values [3] + values [4] + values[5] + values[6] + values[7]) / 8;
 
-                    System.out.print(" V0: " + values[0]);
-                    System.out.print(" V1: " + values[1]);
-                    System.out.print(" V2: " + values[2]);
-                    System.out.print(" V3: " + values[3]);
-                    System.out.print(" V4: " + values[4]);
-                    System.out.print(" V5: " + values[5]);
-                    System.out.print(" V6: " + values[6]);
-                    System.out.print(" V7: " + values[7]);
 
-                    if ((stop < 35) | (stop > 90))
+
+                    if ((stop < 35))
                     {
                         System.out.println("followTheLine$ Stop: " + stop);
                         CSLTruck.motorDrive.stop();
                         i = stopnum;
                     }
                     else {
-                        System.out.println(" -i" + i +" pidValue: " + pidValue);
 
-                        if (pidValue > 23) {
+                        if (pidValue > 69) {
                             CSLTruck.motorSteer.rotateTo(-69, true);
                         }
-                        else if (pidValue < -23) {
+                        else if (pidValue < -69) {
                             CSLTruck.motorSteer.rotateTo(69, true);
                         }
                         else {
-                            CSLTruck.motorSteer.rotateTo(-pidValue * 3, true);
+                            CSLTruck.motorSteer.rotateTo(-pidValue, true);
                         }
-                        Thread.sleep(50);
+
+                        Thread.sleep(40);
 
                         if (((pidValue < -20) | (pidValue > 20)) && (motorDriveSpeed == 100)) {
                             motorDriveSpeed = 50;
