@@ -48,7 +48,6 @@ public class NewPID {
      *      x2 = 37
      *
      *      PID = -45 + (38 - 37) / 2 = -44
-     *
      */
 
     public static int calculatePID(int[] rawValues, int thresholdValue){
@@ -132,11 +131,11 @@ public class NewPID {
     }
 
     private static int f(int x1, int x2){
-        if ((x1 - x2) <=15){
+        if ((x1 - x2) <= 15){
             return (x1 - x2) / 2;
         }
         else{
-            return 15;
+            return 15 / 2;
         }
     }
 }
