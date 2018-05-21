@@ -131,11 +131,14 @@ public class NewPID {
     }
 
     private static int f(int x1, int x2){
-        if ((x1 - x2) <= 15){
-            return (x1 - x2) / 2;
+        if ((x1 - x2) > 15){
+            return 15 / 2;
+        }
+        else if ((x1 - x2) < -15){
+            return -15 / 2;
         }
         else{
-            return 15 / 2;
+            return (x1 - x2) / 2;
         }
     }
 }
