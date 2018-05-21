@@ -349,7 +349,7 @@ class CSLTRun extends Thread {
                 values = CSLTruck.lineReader.getCALValues();
                 Thread.sleep(200);
                 values = CSLTruck.lineReader.getCALValues();
-                pidValue = NewPID.calculatePID(values);
+                pidValue = NewPID.calculatePID(values, 50);
 
                 System.out.print(" V0: " + values[0]);
                 System.out.print(" V1: " + values[1]);
@@ -376,7 +376,7 @@ class CSLTRun extends Thread {
                 for(int i = 0; i < stopnum; i++){
 
                     values = CSLTruck.lineReader.getCALValues();
-                    pidValue = NewPID.calculatePID(values);
+                    pidValue = NewPID.calculatePID(values, 50);
 
                     stop = (values[0] + values[1] + values[2] + values [3] + values [4] + values[5] + values[6] + values[7]) / 8;
 
