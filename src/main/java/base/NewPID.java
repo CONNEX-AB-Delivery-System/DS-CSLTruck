@@ -106,31 +106,31 @@ public class NewPID {
 
 
         if (calculationIndex == 0){
-            PIDValue = -60 + f(x1, x2);
+            PIDValue = -60 + positionAdjustment(x1, x2);
         }
         else if (calculationIndex == 1){
-            PIDValue = -40 + f(x1, x2);
+            PIDValue = -40 + positionAdjustment(x1, x2);
         }
         else if (calculationIndex == 2){
-            PIDValue = -15 + f(x1, x2);
+            PIDValue = -15 + positionAdjustment(x1, x2);
         }
         else if (calculationIndex == 3){
-            PIDValue = f(x1, x2);
+            PIDValue = positionAdjustment(x1, x2);
         }
         else if (calculationIndex == 4){
-            PIDValue = 15 + f(x1, x2);
+            PIDValue = 15 + positionAdjustment(x1, x2);
         }
         else if (calculationIndex == 5){
-            PIDValue = 40 + f(x1, x2);
+            PIDValue = 40 + positionAdjustment(x1, x2);
         }
         else if (calculationIndex == 6){
-            PIDValue = 60 + f(x1, x2);
+            PIDValue = 60 + positionAdjustment(x1, x2);
         }
 
         return PIDValue;
     }
 
-    private static int f(int x1, int x2){
+    private static int positionAdjustment(int x1, int x2){
         if ((x1 - x2) > 14){
             return 14;
         }
