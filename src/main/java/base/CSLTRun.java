@@ -294,7 +294,7 @@ class CSLTRun extends Thread {
         int craneLiftSpeed = 500;
         int lowerCraneConstant = 9250;
         int grabberConstant = 6400;
-        int craneLiftDriveConstant = 6500;
+        int craneLiftDriveConstant = 4500;
         int stopLiftConstant = 200;
 
 
@@ -311,43 +311,37 @@ class CSLTRun extends Thread {
                 //https://github.com/CONNEX-AB-Delivery-System/DS-CSLTruck/blob/master/README.md
 
                 //TODO: To test in action
-                //safeRotateTo(CSLTruck.craneLift, lowerCraneConstant,500,"craneLift");
+                safeRotateTo(CSLTruck.craneLift, lowerCraneConstant,500,"craneLift");
 
-                //safeRotateTo(CSLTruck.craneGrabber, grabberConstant,500,"craneGrabber");
+                safeRotateTo(CSLTruck.craneGrabber, grabberConstant,500,"craneGrabber");
 
-                //safeRotateTo(CSLTruck.craneLift, craneLiftDriveConstant,500,"craneLift");
+                safeRotateTo(CSLTruck.craneLift, craneLiftDriveConstant,500,"craneLift");
 
                 Thread.sleep(1000);
 
 
-                /* Thread.sleep(1000);
-                 CSLTruck.motorSteer.setSpeed(300);
-                 CSLTruck.motorSteer.rotateTo(-80, true);
-                 Thread.sleep(200);
-                 CSLTruck.motorDrive.setSpeed(200);
-                 CSLTruck.motorDrive.forward();
-                 Thread.sleep(9500);
-                 CSLTruck.motorDrive.stop(true);
+                Thread.sleep(1000);
+                CSLTruck.motorSteer.setSpeed(300);
+                CSLTruck.motorSteer.rotateTo(-80, true);
+                Thread.sleep(200);
 
-                 Thread.sleep(500);
+                safeRotateTo(CSLTruck.motorDrive, 1800,200,"motorDrive");
 
-                 CSLTruck.motorSteer.setSpeed(300);
-                 CSLTruck.motorSteer.rotateTo(80, true);
-                 Thread.sleep(200);
-                 CSLTruck.motorDrive.setSpeed(200);
-                 CSLTruck.motorDrive.backward();
-                 Thread.sleep(9000);
-                 CSLTruck.motorDrive.stop(true);
+                Thread.sleep(500);
 
-                 Thread.sleep(500);
+                CSLTruck.motorSteer.setSpeed(300);
+                CSLTruck.motorSteer.rotateTo(80, true);
+                Thread.sleep(200);
+                safeRotateTo(CSLTruck.motorDrive, 0,200,"motorDrive");
 
-                 CSLTruck.motorSteer.setSpeed(300);
-                 CSLTruck.motorSteer.rotateTo(0, true);
-                 Thread.sleep(200);
+                Thread.sleep(500);
 
-                 Thread.sleep(1000);
+                CSLTruck.motorSteer.setSpeed(300);
+                CSLTruck.motorSteer.rotateTo(0, true);
+                Thread.sleep(200);
 
-                */
+                Thread.sleep(1000);
+
 
                 values = CSLTruck.lineReader.getCALValues();
                 Thread.sleep(200);
@@ -396,7 +390,7 @@ class CSLTRun extends Thread {
 
                         pidValue = NewPID.calculatePID(values, 60);
                         System.out.println(" -i" + i +" pidValue: " + pidValue);
-                        
+
                         if (pidValue == -100) {
                             pidflag = 1;
                         }
